@@ -18,7 +18,12 @@ commands = rows.each_with_index.map do |row, index|
   data[:id] ||= data.delete(:foundid)
   data[:id] ||= 'LAST' if rows[index][:name] == rows[index-1][:name]
 
-  year = data[:electionlabel][/(\d{4})/, 1]
+  unless data[:electionlabel]
+    warn "No election for #{data}"
+    next
+  end
+
+  year = data[:electionlabel][/(\d{4})/, 1] rescue binding.pry
   data[:constituency] = json[:wikidata].find { |item| (year >= item[:start]) && (year < item[:end]) }[:id] rescue binding.pry
 
   QuickStatement::Candidate.new(
